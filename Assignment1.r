@@ -11,8 +11,6 @@ raw_data <- read.csv(here("Data", "final_data.csv"))
 data <- raw_data
 conflict <- data
 
-# Armed conflict is already lagged in the input data, as supplied.
-# Use it directly without shifting again or removing the first year.
 table_data <- data |>
   mutate(
     conflict_group = factor(
@@ -67,7 +65,7 @@ variable_labels <- c(
 )
 
 
-# 4. Define summary functions --------------------------------
+# Define summary functions
 
 summarize_variable <- function(x, name) {
 
@@ -132,7 +130,7 @@ summarize_group <- function(df, group) {
 }
 
 
-# 5. Generate Table 1 data -----------------------------------
+# Generate Table 1 data 
 
 overall <- summarize_group(table_data, "Overall")
 
@@ -161,7 +159,7 @@ table1 <- overall |>
   )
 
 
-# 6. Format Table 1 ------------------------------------------
+# Format Table
 
 n_total <- nrow(table_data)
 
@@ -200,7 +198,7 @@ ft <- flextable(table1) |>
   autofit()
 
 
-# 7. Add notes -----------------------------------------------
+# Add notes
 
 ft <- ft |>
   add_footer_lines(
@@ -214,7 +212,7 @@ ft <- ft |>
   )
 
 
-# 8. Export Table 1 ------------------------------------------
+# Export
 
 save_as_docx(
   "Table 1. Study Characteristics by Armed Conflict" = ft,
