@@ -209,8 +209,7 @@ ft <- ft |>
       "Other continuous variables: mean (SD).",
       "Binary variables: n (%).",
       "Primary outcomes: Maternal mortality, Under-5 mortality, Infant mortality, Neonatal mortality.",
-      "Covariates: GDP per capita, OECD membership, Population density, Urban population, Age dependency ratio, Male education, Temperature, Rainfall, Earthquake, Drought.",
-      "Armed conflict uses the lagged values supplied in the input data; no additional lag is applied."
+      "Conflict status uses the already-lagged input variable."
     )
   )
 
