@@ -3,12 +3,9 @@ library(here)
 library(plm)
 library(flextable)
 
-# Load the prepared data directly; no further data modification is needed.
-conflict <- read.csv(here("Data", "final_data.csv"))
-# armed_conflict is already lagged by one year in the supplied data.
-# Apply natural log to GDP directly in the model formula below.
+finaldata <- read.csv(here("Data", "final_data.csv"))
 
-# 3. MODEL SPECIFICATION
+#MODEL SPECIFICATION
 
 
 predictors <- c(
@@ -17,34 +14,56 @@ predictors <- c(
   "rainfall_1000", "earthquake", "drought"
 )
 
-outcomes <- c(
-  "maternal_mortality",
-  "under5_mortality",
-  "infant_mortality",
-  "neonatal_mortality"
+# FIXED EFFECTS REGRESSION
+# log() applies the required natural-log transformation to GDP.
+# The supplied armed_conflict variable is already lagged by one year.
+
+plmmod_maternal <- plm(
+  maternal_mortality ~ armed_conflict + log(gdp_1000) + oecd + pop_dens + urban +
+    age_dep + male_edu + temp + rainfall_1000 + earthquake + drought,
+  index = c("iso", "year"),
+  effect = "twoways",
+  model = "within",
+  data = finaldata,
+  na.action = na.omit
 )
 
+plmmod_under5 <- plm(
+  under5_mortality ~ armed_conflict + log(gdp_1000) + oecd + pop_dens + urban +
+    age_dep + male_edu + temp + rainfall_1000 + earthquake + drought,
+  index = c("iso", "year"),
+  effect = "twoways",
+  model = "within",
+  data = finaldata,
+  na.action = na.omit
+)
 
-# ============================================================
-# 4. TWO-WAY FIXED EFFECTS REGRESSION
-# ============================================================
+plmmod_infant <- plm(
+  infant_mortality ~ armed_conflict + log(gdp_1000) + oecd + pop_dens + urban +
+    age_dep + male_edu + temp + rainfall_1000 + earthquake + drought,
+  index = c("iso", "year"),
+  effect = "twoways",
+  model = "within",
+  data = finaldata,
+  na.action = na.omit
+)
 
-models <- lapply(outcomes, function(outcome) {
+plmmod_neonatal <- plm(
+  neonatal_mortality ~ armed_conflict + log(gdp_1000) + oecd + pop_dens + urban +
+    age_dep + male_edu + temp + rainfall_1000 + earthquake + drought,
+  index = c("iso", "year"),
+  effect = "twoways",
+  model = "within",
+  data = finaldata,
+  na.action = na.omit
+)
 
-  formula <- reformulate(predictors, response = outcome)
-
-  plm(
-    formula,
-    data = conflict,
-    index = c("iso", "year"),
-    model = "within",
-    effect = "twoways",
-    na.action = na.omit
-  )
-})
-
-names(models) <- c(
-  "Maternal", "Under-5", "Infant", "Neonatal"
+# Collect the four fitted models for the results table.
+models <- list(
+  Maternal = plmmod_maternal,
+  `Under-5` = plmmod_under5,
+  Infant = plmmod_infant,
+  Neonatal = plmmod_neonatal
 )
 
 # Country-clustered Huber-White covariance, allowing serial correlation.
@@ -54,9 +73,6 @@ robust_vcov <- lapply(models, function(m) {
 })
 
 # Table 2: adjusted coefficients and 95% CIs, binary conflict models only.
-# Reference: https://doi.org/10.1371/journal.pmed.1003810
-# GDP is logged here as required by the assignment; this is not an exact
-# numerical replication of the published analysis or its sample.
 labels <- c(
   "Armed conflict (yes vs no; previous year)",
   "Log GDP per capita (natural log)", "OECD member", "Population density",
